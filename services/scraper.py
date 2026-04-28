@@ -1,12 +1,21 @@
 from playwright.async_api import async_playwright
 
-async def scrape_title(url: str):
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
-        page = await browser.new_page()
+class Scraper:
+    def __init__(self):
+        self.playwright = None
+        self.browser = None
 
+    async def start(self):
+        self.playwright = await async_playwright().start()
+        self.browser = await self.playwright.chromium.launch(headless=False)
+
+    async def stop(self):
+        await self.browser.close()
+        await self.playwright.stop()
+
+    async def get_title(self, url: str):
+        page = await self.browser.new_page()
         await page.goto(url)
         title = await page.title()
-
-        await browser.close()
+        await page.close()
         return title
