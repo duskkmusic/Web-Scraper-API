@@ -1,22 +1,20 @@
 from fastapi import FastAPI
 from services.scraper import Scraper
+from routes.scraper import router as scraper_router
+
 
 app = FastAPI()
-scraper = Scraper()
 
 
 @app.on_event("startup")
 async def startup():
-    await scraper.start()
+    app.state.scraper = Scraper()
+    await app.state.scraper.start()
    
 
 @app.on_event("shutdown")
 async def shutdown():
-    await scraper.stop()
+    await app.state.scraper.stop()
 
 
-@app.get("/title")
-async def get_title(url: str):
-    title = await scrape_title(url)
-    return {"title": title}
-
+app.include_router(scraper_router)
